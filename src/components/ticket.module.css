@@ -1,0 +1,32 @@
+.ticket {
+  background-image: url('../assets/ticket-polos.png');
+  background-size: cover;
+  background-position: center;
+  width: 85%;
+  height: 100%;
+  border-radius: 16px;
+  display: flex;
+  overflow: hidden;
+}
+
+
+.ticketLeft {
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 2;
+}
+
+.ticketRight {
+  position: relative;
+  width: 30%;
+}
+
+.ticketImage {
+  object-fit: cover;
+  z-index: 0;
+}
+
+

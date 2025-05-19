@@ -1,0 +1,97 @@
+import image1 from "../assets/concert_img/coldplay.png"
+import image2 from "../assets/concert_img/edsherang.png"
+
+const concerts = [
+  {
+    title: 'Summer Beats Festival',
+    description: 'Join us for an unforgettable night of music and fun!',
+    date: 'May 25, 2025',
+    location: 'Jakarta Convention Center',
+    image: image1,
+    city : "Bogor",
+    price: 'IDR 150,000',
+  },
+  {
+    title: 'Rock Night Live',
+    description: 'Feel the energy of rock music live on stage.',
+    date: 'June 10, 2025',
+    location: 'Stadion Gelora Bung Karno',
+    city : "Bogor",
+    image: image2,
+    price: 'IDR 900,000',
+  },
+  {
+    title: 'Jazz in The Park',
+    description: 'Smooth jazz evening under the stars.',
+    date: 'July 5, 2025',
+    location: 'Taman Mini Indonesia Indah',
+    city : "Bogor",
+    image: image1,
+    price: 'IDR 600,000',
+  },
+  {
+    title: 'Summer Beats Festival',
+    description: 'Join us for an unforgettable night of music and fun!',
+    date: 'May 25, 2025',
+    location: 'Jakarta Convention Center',
+    city : "Jakarta",
+    image: image1,
+    price: 'IDR 750,000',
+  },
+  {
+    title: 'Rock Night Live',
+    description: 'Feel the energy of rock music live on stage.',
+    date: 'June 10, 2025',
+    location: 'Stadion Gelora Bung Karno',
+    city : "Semarang",
+    image: image1,
+    price: 'IDR 900,000',
+  },
+  {
+    title: 'Jazz in The Park',
+    description: 'Smooth jazz evening under the stars.',
+    date: 'July 5, 2025',
+    location: 'Taman Mini Indonesia Indah',
+    city : "Kutai",
+    image: image1,
+    price: 'IDR 600,000',
+  },
+  {
+    title: 'Jazz in The Park',
+    description: 'Smooth jazz evening under the stars.',
+    date: 'July 5, 2025',
+    location: 'Taman Mini Indonesia Indah',
+    city : "Bogor",
+    image: image1,
+    price: 'IDR 600,000',
+  },
+  {
+    title: 'Jazz in The Park',
+    description: 'Smooth jazz evening under the stars.',
+    date: 'July 5, 2025',
+    location: 'Taman Mini Indonesia Indah',
+    city : "Bogor",
+    image: 'https://source.unsplash.com/featured/?jazz,live',
+    price: 'IDR 600,000',
+  },
+  {
+    title: 'Si 100 rb',
+    description: 'Smooth jazz evening under the stars.',
+    date: 'July 5, 2025',
+    location: 'Taman Mini Indonesia Indah',
+    city : "Bogor",
+    image: 'https://source.unsplash.com/featured/?jazz,live',
+    price: 'IDR 100,000',
+  },
+    {
+    title: 'Si 100 rb',
+    description: 'Smooth jazz evening under the stars.',
+    date: 'July 5, 2025',
+    location: 'Taman Mini Indonesia Indah',
+    city : "Bogor",
+    image: 'https://source.unsplash.com/featured/?jazz,live',
+    price: 'IDR 100,000',
+  }
+];
+
+export default concerts;
