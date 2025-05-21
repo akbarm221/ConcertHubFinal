@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // Opsional, jika perlu link kembali
+import { Link } from 'react-router-dom'; 
 
 const VenuesPage = () => (
   <div className="container mx-auto p-8">

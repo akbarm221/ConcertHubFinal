@@ -1,10 +1,11 @@
 // src/components/AuthModal/AuthModal.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
+import { useNavigate } from 'react-router-dom'; // <-- 1. Impor useNavigate
 
-// ... (GoogleIcon tetap sama) ...
+// ... (Komponen GoogleIcon tetap sama) ...
 const GoogleIcon = () => (
   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <path d="M21.825 11.237H12.11V13.608H17.613C17.397 14.762 16.706 15.748 15.716 16.42L15.71 16.425L13.675 18.009L13.511 18.109C14.909 19.339 16.738 20.125 18.863 20.125C21.35 20.125 23.25 19.25 24 17.75L21.825 11.237Z" fill="#4285F4"/>
@@ -18,6 +19,14 @@ const GoogleIcon = () => (
 const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
   const [activeTab, setActiveTab] = useState('login');
   const [modalError, setModalError] = useState('');
+  const navigate = useNavigate(); // <-- 2. Inisialisasi useNavigate
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab('login');
+      setModalError('');
+    }
+  }, [isOpen]);
 
   if (!isOpen) {
     return null;
@@ -31,7 +40,14 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
 
   const handleAuthProcessSuccess = (userDataFromForm, authType) => {
     console.log(`${authType} success from form:`, userDataFromForm);
-    onAuthSuccess(userDataFromForm, authType);
+    onAuthSuccess(userDataFromForm, authType); // Panggil callback prop dari parent (misal App.jsx)
+
+    // 3. Lakukan navigasi setelah sukses
+    if (authType === 'login') { // Hanya navigasi ke /order jika itu adalah login
+      navigate('/order');
+    }
+    // Anda mungkin ingin onClose() dipanggil di sini atau di onAuthSuccess di parent
+    // onClose(); // Tutup modal setelah navigasi atau setelah onAuthSuccess dipanggil
   };
 
   const handleGoogleSignIn = () => {
@@ -41,42 +57,56 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity duration-300 ease-in-out"
+      className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity duration-150 ease-in-out"
       onClick={handleOverlayClick}
+      aria-modal="true"
+      role="dialog"
     >
-      {/* Tambahkan max-h-[...] dan overflow-y-auto di sini */}
-      <div className="bg-white p-6 sm:p-7 rounded-xl shadow-2xl w-full max-w-md transform transition-all duration-300 ease-in-out flex flex-col max-h-[90vh]">
-        <div className="text-center mb-4 sm:mb-5"> {/* Kurangi margin bottom sedikit */}
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Welcome to ConcertHub</h2>
+      <div
+        className="bg-white p-5 sm:p-6 rounded-xl shadow-2xl w-full max-w-md transform transition-all duration-150 ease-in-out flex flex-col max-h-[90vh] sm:max-h-[85vh]"
+        onClick={(e) => e.stopPropagation()}
+        role="document"
+      >
+        {/* ... (Bagian Atas Modal, Tab, Error Message tetap sama) ... */}
+        <div className="flex justify-between items-center mb-4 sm:mb-5">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+            Welcome to ConcertHub
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors text-2xl leading-none"
+            aria-label="Close modal"
+          >
+            &times;
+          </button>
         </div>
 
-        <div className="flex mb-4 sm:mb-5 border-b border-gray-200"> {/* Kurangi margin bottom sedikit */}
+        <div className="flex mb-4 sm:mb-5 border-b border-gray-200">
           <button
             onClick={() => { setActiveTab('login'); setModalError(''); }}
-            className={`flex-1 py-2.5 text-center font-semibold transition-colors duration-200 focus:outline-none text-sm sm:text-base ${ // Kurangi py dan sesuaikan font size
+            className={`flex-1 py-2.5 text-center font-semibold transition-colors duration-200 focus:outline-none text-sm ${
               activeTab === 'login'
                 ? 'text-purple-600 border-b-2 border-purple-600'
-                : 'text-gray-500 hover:text-purple-500 hover:border-b-2 hover:border-gray-300'
+                : 'text-gray-500 hover:text-purple-500'
             }`}
           >
             Login
           </button>
           <button
             onClick={() => { setActiveTab('register'); setModalError(''); }}
-            className={`flex-1 py-2.5 text-center font-semibold transition-colors duration-200 focus:outline-none text-sm sm:text-base ${ // Kurangi py dan sesuaikan font size
+            className={`flex-1 py-2.5 text-center font-semibold transition-colors duration-200 focus:outline-none text-sm ${
               activeTab === 'register'
                 ? 'text-purple-600 border-b-2 border-purple-600'
-                : 'text-gray-500 hover:text-purple-500 hover:border-b-2 hover:border-gray-300'
+                : 'text-gray-500 hover:text-purple-500'
             }`}
           >
             Register
           </button>
         </div>
 
-        {modalError && <p className="text-red-500 text-xs mb-3 text-center">{modalError}</p>} {/* Kurangi mb */}
+        {modalError && <p className="flex-shrink-0 text-red-500 text-xs mb-2 text-center">{modalError}</p>}
 
-        {/* Konten form sekarang bisa scroll jika terlalu panjang */}
-        <div className="overflow-y-auto pb-2 custom-scrollbar"> {/* Tambahkan custom scrollbar jika mau */}
+        <div className="flex-grow overflow-y-auto pb-4 scrollbar-hide">
           {activeTab === 'login' ? (
             <LoginForm onSuccess={(userData) => handleAuthProcessSuccess(userData, 'login')} />
           ) : (
@@ -84,33 +114,22 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
           )}
         </div>
 
-        {/* Bagian OR dan Google bisa tetap atau ikut scroll jika diletakkan di dalam div scrollable */}
-        {/* Jika ingin tetap di bawah, pisahkan dari div overflow-y-auto */}
-        <div className="pt-4"> {/* Tambahkan pt untuk memberi jarak jika dipisah */}
-            <div className="my-4 flex items-center"> {/* Kurangi my */}
+        <div className="flex-shrink-0 pt-3 border-t border-gray-200 mt-4">
+          <div className="my-3 flex items-center">
             <div className="flex-grow border-t border-gray-300"></div>
-            <span className="flex-shrink mx-3 text-gray-400 text-xs">OR</span> {/* Kurangi mx dan font size */}
+            <span className="flex-shrink mx-2 text-gray-400 text-xs">OR</span>
             <div className="flex-grow border-t border-gray-300"></div>
-            </div>
+          </div>
 
-            <button
+          <button
             type="button"
             onClick={handleGoogleSignIn}
-            // Kurangi py
-            className="w-full flex items-center justify-center bg-white text-gray-700 py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-purple-500 transition duration-150 ease-in-out font-medium text-sm"
-            >
+            className="w-full flex items-center justify-center bg-white text-gray-700 py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 text-sm font-medium"
+          >
             <GoogleIcon />
             Continue with Google
-            </button>
+          </button>
         </div>
-
-
-        <button
-          onClick={onClose}
-          className="mt-4 w-full text-center text-xs text-gray-600 hover:text-purple-600 hover:underline focus:outline-none" // Kurangi mt dan font size
-        >
-          Tutup
-        </button>
       </div>
     </div>
   );

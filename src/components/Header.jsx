@@ -2,14 +2,15 @@ import { useState } from 'react';
 import LogoIcon from '../assets/logo.svg';
 import SearchIcon from '../assets/search.svg';
 import UserIcon from '../assets/profile-logo.svg';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navLinks = [
-    { name: 'Concerts', href: '#' },
+    { name: 'Concerts', href: '/' },
     { name: 'Venues', href: '#' },
-    { name: 'My Tickets', href: '#' },
+    { name: 'My Tickets', href: '/testing' },
     { name: 'Support', href: '#' },
   ];
 

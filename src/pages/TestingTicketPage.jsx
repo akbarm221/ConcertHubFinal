@@ -1,15 +1,13 @@
-// src/pages/MyTicketsPage.jsx (atau src/components/MyTicketsPage.jsx)
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-// 1. Impor komponen-komponen Anda
-import HeroMyTicket from '../components/HeroMyTicket'; // Pastikan path ini benar
-import TicketCard from '../components/TicketCard';     // Pastikan path ini benar
+
+import HeroMyTicket from '../components/HeroMyTicket'; 
+import TicketCard from '../components/TicketCard';     
 
 // Komponen Filter Sederhana
 const TicketFilters = ({ onFilterChange, currentActiveFilter }) => {
-  // Nama filter bisa diambil dari data atau di-hardcode
-  // Sesuaikan nama filter ini dengan yang Anda inginkan
+
   const filterNames = ['Upcoming', 'Past Tickets', 'All Transaction History'];
 
   return (
@@ -20,7 +18,7 @@ const TicketFilters = ({ onFilterChange, currentActiveFilter }) => {
             <button
               key={name}
               onClick={() => {
-                onFilterChange(name); // Panggil fungsi filter dari parent
+                onFilterChange(name); 
               }}
               className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap
                           ${currentActiveFilter === name
@@ -37,7 +35,7 @@ const TicketFilters = ({ onFilterChange, currentActiveFilter }) => {
   );
 };
 
-// Pengaturan Paginasi
+
 const ITEMS_PER_PAGE = 3;
 
 function MyTicketsPage() {
@@ -52,18 +50,16 @@ function MyTicketsPage() {
     if (storedTickets) {
       try {
         const parsedTickets = JSON.parse(storedTickets);
-        // TODO: Di sini Anda mungkin perlu memfilter tiket berdasarkan `activeFilter`
-        // sebelum menyimpannya ke `setAllPurchasedTickets` atau membuat state baru untuk tiket yang difilter.
-        // Untuk sekarang, kita tampilkan semua.
+
         setAllPurchasedTickets(parsedTickets);
       } catch (e) {
         console.error("Error parsing stored tickets from localStorage:", e);
         setAllPurchasedTickets([]);
       }
     }
-    // Simulasi loading, hapus jika tidak perlu
+ 
     setTimeout(() => setIsLoading(false), 300);
-  }, []); // Mungkin perlu dependency [activeFilter] jika data di-fetch ulang saat filter
+  }, []); 
 
   const handleDeleteTicket = (ticketIdToDelete) => {
     if (window.confirm(`Apakah Anda yakin ingin menghapus tiket dengan ID: ${ticketIdToDelete}?`)) {
@@ -73,12 +69,12 @@ function MyTicketsPage() {
       localStorage.setItem('myPurchasedTickets', JSON.stringify(updatedTickets));
       setAllPurchasedTickets(updatedTickets);
 
-      // Sesuaikan halaman saat ini jika item terakhir di halaman dihapus
+     
       const newTotalPages = Math.ceil(updatedTickets.length / ITEMS_PER_PAGE);
       if (currentPage > newTotalPages && newTotalPages > 0) {
         setCurrentPage(newTotalPages);
       } else if (updatedTickets.length === 0) {
-        setCurrentPage(1); // Kembali ke halaman pertama jika tidak ada tiket lagi
+        setCurrentPage(1); 
       }
       alert(`Tiket dengan ID: ${ticketIdToDelete} berhasil dihapus.`);
     }
@@ -87,28 +83,11 @@ function MyTicketsPage() {
   const handleFilterChange = (filterName) => {
     console.log("Filter aktif:", filterName);
     setActiveFilter(filterName);
-    setCurrentPage(1); // Selalu reset ke halaman pertama saat filter berubah
-    // --- LOGIKA FILTER SEBENARNYA AKAN DITERAPKAN DI SINI ---
-    // Anda perlu memfilter `allPurchasedTickets` berdasarkan `filterName`
-    // dan mungkin menyimpannya ke state terpisah untuk `currentTicketsToDisplay`.
-    // Contoh sederhana (perlu disesuaikan dengan data tiket Anda):
-    // const originalTickets = JSON.parse(localStorage.getItem('myPurchasedTickets') || '[]');
-    // if (filterName === 'Upcoming') {
-    //   // Logika filter upcoming
-    //   setFilteredTickets(originalTickets.filter(t => new Date(t.eventDate) >= new Date()));
-    // } else if (filterName === 'Past Tickets') {
-    //   // Logika filter past
-    //   setFilteredTickets(originalTickets.filter(t => new Date(t.eventDate) < new Date()));
-    // } else { // All Transaction History
-    //   setFilteredTickets(originalTickets);
-    // }
+    setCurrentPage(1); 
   };
 
-  // Logika untuk Paginasi dan Filtering (sementara filter belum diimplementasikan penuh)
-  // Untuk sekarang, paginasi bekerja pada `allPurchasedTickets`
-  // Nantinya, ini harus bekerja pada `filteredTickets`
-  const ticketsToPaginate = allPurchasedTickets; // Ganti dengan state tiket yang sudah difilter nanti
-
+  
+  const ticketsToPaginate = allPurchasedTickets; 
   const totalPages = Math.ceil(ticketsToPaginate.length / ITEMS_PER_PAGE);
   const currentTicketsToDisplay = ticketsToPaginate.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -129,17 +108,13 @@ function MyTicketsPage() {
 
   return (
     <>
-      {/* Komponen HeroMyTicket untuk header halaman */}
+      
       <HeroMyTicket />
 
-      {/* Kontainer utama untuk filter dan daftar tiket */}
-      {/* mx-auto menengahkan, padding diatur untuk berbagai ukuran layar */}
+      
       <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
 
-        {/* Kotak Putih untuk Filter dan Daftar Tiket */}
-        {/* --- SESUAIKAN LEBAR KOTAK PUTIH DI SINI --- */}
-        {/* Contoh menggunakan max-w-5xl. Anda bisa ganti ke max-w-4xl, max-w-6xl, max-w-7xl,
-            atau hapus max-w-XXL jika ingin lebar penuh dari 'container' */}
+        
         <div className="bg-white shadow-xl rounded-lg p-4 sm:p-6 max-w-7xl mx-auto">
 
           <TicketFilters
@@ -147,15 +122,15 @@ function MyTicketsPage() {
             currentActiveFilter={activeFilter}
           />
 
-          {ticketsToPaginate.length === 0 && !isLoading ? ( // Tampilkan jika tidak loading dan tidak ada tiket
+          {ticketsToPaginate.length === 0 && !isLoading ? ( 
             <div className="text-center py-10">
               <p className="text-gray-600 text-xl mb-4">
-                {activeFilter !== 'All Transaction History' && activeFilter !== 'Upcoming' // Asumsi default adalah upcoming atau all
+                {activeFilter !== 'All Transaction History' && activeFilter !== 'Upcoming' 
                   ? `Tidak ada tiket untuk filter "${activeFilter}".`
                   : "Anda belum memiliki tiket."}
               </p>
               <Link
-                to="/" // Arahkan ke halaman booking
+                to="/" 
                 className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-6 rounded-lg transition duration-150"
               >
                 Beli Tiket Sekarang
@@ -163,19 +138,19 @@ function MyTicketsPage() {
             </div>
           ) : (
             <>
-              {/* Daftar Tiket (menggunakan TicketCard) */}
-              {/* flex flex-col items-center akan menengahkan TicketCard jika lebarnya lebih kecil dari kontainer ini */}
+              
+             
               <div className="flex flex-col items-center space-y-6">
                 {currentTicketsToDisplay.map((ticket) => (
                   <TicketCard
                     key={ticket.uniqueTicketId}
-                    ticket={ticket} // Kirim data tiket ke komponen TicketCard
+                    ticket={ticket} 
                     onDelete={() => handleDeleteTicket(ticket.uniqueTicketId)} // Kirim fungsi hapus
                   />
                 ))}
               </div>
 
-              {/* Navigasi Paginasi */}
+           
               {totalPages > 1 && (
                 <div className="mt-8 flex justify-center items-center space-x-4">
                   <button

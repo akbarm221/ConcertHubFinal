@@ -7,18 +7,15 @@ const LoginForm = ({ onSuccess }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    // Logika login statis (ganti dengan API call di masa mendatang)
-    // Sesuai gambar, fieldnya "Email address"
-    if (email === 'user@example.com' && password === 'password') {
-      // Kirim data pengguna jika ada, atau status sukses
-      onSuccess({ email, id: 'staticUserId123', message: 'Login successful (static)' });
-    } else {
-      setError('Email atau password salah. (Hint: user@example.com / password)');
-    }
+    // setError(''); // Tidak perlu setError lagi
+
+    // Langsung panggil onSuccess seolah-olah login berhasil
+    // Anda bisa mengirim data dummy atau data yang relevan jika ada
+    onSuccess({ email: email || 'mockuser@example.com', id: 'staticUserId123', message: 'Login successful (forced)' });
   };
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">

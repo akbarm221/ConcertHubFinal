@@ -7,10 +7,9 @@ import AuthModal from './AuthModal/AuthModal'; // GANTI INI: Impor AuthModal yan
 
 const ConcertCard = ({ title, date, location, image, price }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  // Status login pengguna, awalnya false (belum login)
-  // Di aplikasi nyata, ini akan dikelola oleh context, Redux, atau state global lainnya
+ 
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
-  const [userData, setUserData] = useState(null); // Untuk menyimpan data pengguna setelah login/register
+  const [userData, setUserData] = useState(null); 
 
   const parsePrice = (priceValue) => {
     if (typeof priceValue === 'number') {
@@ -27,35 +26,27 @@ const ConcertCard = ({ title, date, location, image, price }) => {
 
   const handleBookNowClick = () => {
     if (!isUserLoggedIn) {
-      setIsAuthModalOpen(true); // Buka modal jika pengguna belum login
+      setIsAuthModalOpen(true); 
     } else {
-      // Logika jika pengguna sudah login
+   
       alert(`Hi ${userData?.email || 'User'}! Lanjutkan ke proses booking untuk ${title}.`);
-      // Di sini Anda akan melanjutkan ke halaman booking atau logika lainnya
+     
     }
   };
 
-  // GANTI NAMA FUNGSI INI dan sesuaikan parameternya
+
   const handleAuthSuccess = (authData, authType) => {
-    // authData akan berisi data dari form (misal: { email, id })
-    // authType akan berisi 'login' atau 'register'
+   
     console.log(`${authType} berhasil:`, authData);
-    setIsUserLoggedIn(true); // Set status login menjadi true
-    setUserData(authData); // Simpan data pengguna
-    setIsAuthModalOpen(false); // Tutup modal
+    setIsUserLoggedIn(true); 
+    setUserData(authData); 
+    setIsAuthModalOpen(false); 
     alert(`${authType === 'login' ? 'Login' : 'Registrasi'} berhasil! Selamat datang, ${authData.email}. Anda sekarang dapat melakukan booking.`);
-    // Anda bisa langsung memanggil logika booking di sini jika diinginkan
-    // atau biarkan pengguna mengklik "Book Now" lagi.
-    // Contoh:
-    // if (authType === 'login' || authType === 'register') {
-    //   // Langsung proses booking setelah login/register berhasil
-    //   console.log(`Memproses booking untuk ${title} untuk pengguna ${authData.email}`);
-    //   alert(`Booking untuk ${title} sedang diproses!`);
-    // }
+
   };
 
   const handleCloseModal = () => {
-    setIsAuthModalOpen(false); // Tutup modal
+    setIsAuthModalOpen(false); 
   };
 
   return (
@@ -110,7 +101,7 @@ const ConcertCard = ({ title, date, location, image, price }) => {
         <AuthModal
           isOpen={isAuthModalOpen}
           onClose={handleCloseModal}
-          onAuthSuccess={handleAuthSuccess} // Gunakan handler yang sudah diupdate
+          onAuthSuccess={handleAuthSuccess} 
         />
       )}
     </>

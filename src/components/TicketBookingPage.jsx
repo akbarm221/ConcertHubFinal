@@ -188,7 +188,7 @@ function TicketBookingPage() {
 
       alert(`Pesanan dengan ID ${orderId} berhasil! Total: IDR ${totalPrice.toLocaleString()}. Anda akan diarahkan ke halaman Tiket Saya.`);
       setSelectedTickets({}); 
-      navigate('/my-tickets'); 
+      navigate('/testing'); 
 
     } catch (error) {
       console.error("Gagal menyimpan tiket ke localStorage atau navigasi:", error);

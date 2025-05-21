@@ -20,7 +20,7 @@ function MyTicketsPage() {
   }, []);
 
   const handleDeleteTicket = (ticketIdToDelete) => {
-    // Konfirmasi sebelum menghapus
+    
     if (window.confirm(`Apakah Anda yakin ingin menghapus tiket dengan ID: ${ticketIdToDelete}?`)) {
       // 1. Filter tiket yang ada untuk menghapus tiket yang diinginkan
       const updatedTickets = purchasedTickets.filter(
