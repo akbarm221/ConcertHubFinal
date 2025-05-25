@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
-import { useNavigate } from 'react-router-dom'; // <-- 1. Impor useNavigate
+import { useNavigate } from 'react-router-dom';
 
-// ... (Komponen GoogleIcon tetap sama) ...
+
 const GoogleIcon = () => (
   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <path d="M21.825 11.237H12.11V13.608H17.613C17.397 14.762 16.706 15.748 15.716 16.42L15.71 16.425L13.675 18.009L13.511 18.109C14.909 19.339 16.738 20.125 18.863 20.125C21.35 20.125 23.25 19.25 24 17.75L21.825 11.237Z" fill="#4285F4"/>
@@ -19,11 +19,11 @@ const GoogleIcon = () => (
 const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
   const [activeTab, setActiveTab] = useState('login');
   const [modalError, setModalError] = useState('');
-  const navigate = useNavigate(); // <-- 2. Inisialisasi useNavigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen) {
-      setActiveTab('login');
+      setActiveTab('login'); 
       setModalError('');
     }
   }, [isOpen]);
@@ -40,14 +40,16 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
 
   const handleAuthProcessSuccess = (userDataFromForm, authType) => {
     console.log(`${authType} success from form:`, userDataFromForm);
-    onAuthSuccess(userDataFromForm, authType); // Panggil callback prop dari parent (misal App.jsx)
+    onAuthSuccess(userDataFromForm, authType);
+    
+    if (authType === 'login') {
+      navigate('/testing'); 
+    } else if (authType === 'register') { 
+      setActiveTab('login'); 
+      setModalError('Registrasi berhasil! Silakan login.'); 
 
-    // 3. Lakukan navigasi setelah sukses
-    if (authType === 'login') { // Hanya navigasi ke /order jika itu adalah login
-      navigate('/order');
     }
-    // Anda mungkin ingin onClose() dipanggil di sini atau di onAuthSuccess di parent
-    // onClose(); // Tutup modal setelah navigasi atau setelah onAuthSuccess dipanggil
+   
   };
 
   const handleGoogleSignIn = () => {
@@ -67,7 +69,6 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
         onClick={(e) => e.stopPropagation()}
         role="document"
       >
-        {/* ... (Bagian Atas Modal, Tab, Error Message tetap sama) ... */}
         <div className="flex justify-between items-center mb-4 sm:mb-5">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
             Welcome to ConcertHub

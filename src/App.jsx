@@ -12,24 +12,79 @@ import NotFoundPage from './pages/NotFoundPage';
 import TicketBookingMain from './pages/TicketBookingMain';
 import TicketCard from './components/TicketCard';
 import TestingTicketPage from './pages/TestingTicketPage';
+// Import PrivateRoute yang baru kita buat
+import PrivateRoute from './components/PrivateRoute'; 
 
 function App() {
   return (
-    // min-h-screen dan flex-col memastikan footer menempel di bawah jika konten pendek
-    <div className="min-h-screen flex flex-col bg-gray-100"> {/* Ganti warna background jika perlu */}
+    
+    <div className="min-h-screen flex flex-col bg-gray-100">
       <Header />
-      {/* flex-grow membuat main mengambil ruang tersisa, mendorong footer ke bawah */}
+      
       <main className="flex-grow">
         <Routes>
+         
           <Route path="/" element={<HomePage />} />
-           <Route path="/ticketdesign" element={<TicketCard />} />
-          <Route path="/testing" element={<TestingTicketPage />} />
-          <Route path="/venues" element={<VenuesPage />} />
-          <Route path="/order" element={<TicketBookingMain />} />
-          <Route path="/my-tickets" element={<MyTicketsPage />} />
-          <Route path="/support" element={<SupportPage />} />
-          <Route path="/concert/:concertId" element={<ConcertDetailPage />} />
           
+          {/* Rute-rute yang dilindungi: Bungkus dengan PrivateRoute */}
+          <Route 
+            path="/ticketdesign" 
+            element={
+              <PrivateRoute>
+                <TicketCard />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/testing" 
+            element={
+              <PrivateRoute>
+                <TestingTicketPage />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/venues" 
+            element={
+              <PrivateRoute>
+                <VenuesPage />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/order" 
+            element={
+              <PrivateRoute>
+                <TicketBookingMain />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/my-tickets" 
+            element={
+              <PrivateRoute>
+                <MyTicketsPage />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/support" 
+            element={
+              <PrivateRoute>
+                <SupportPage />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/concert/:concertId" 
+            element={
+              <PrivateRoute>
+                <ConcertDetailPage />
+              </PrivateRoute>
+            } 
+          />
+          
+          {/* Rute Not Found tetap tidak perlu dilindungi */}
           <Route path="*" element={<NotFoundPage />} />
 
         </Routes>

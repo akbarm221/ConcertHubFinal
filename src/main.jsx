@@ -8,8 +8,8 @@ import { BrowserRouter } from 'react-router-dom' // Pastikan ini diimpor
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter> {/* <--- INI BAGIAN KRUSIAL */}
-      <App />       {/* Komponen App Anda, yang berisi <Routes> */}
-    </BrowserRouter> {/* <--- PENUTUP BrowserRouter */}
+    <BrowserRouter> 
+      <App />     
+    </BrowserRouter> 
   </React.StrictMode>,
 )
