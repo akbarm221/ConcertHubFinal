@@ -7,8 +7,6 @@ const ConcertGrid = ({ concerts, paginationData, currentPage, onPageChange }) =>
   if (!paginationData && (!concerts || concerts.length === 0)) {
     // Pesan ini bisa ditampilkan oleh ConcertList saat loading atau error,
     // jadi mungkin tidak perlu di sini, atau bisa sebagai fallback.
-    // Jika ConcertList sudah menampilkan pesan loading/error, ini mungkin tidak akan pernah terlihat.
-    // Namun, jika concerts kosong setelah fetch berhasil (tidak ada hasil), pesan di bawah akan muncul.
   }
 
   // Jika array konser kosong SETELAH fetch (tidak ada hasil yang cocok dengan filter)
@@ -34,9 +32,12 @@ const ConcertGrid = ({ concerts, paginationData, currentPage, onPageChange }) =>
             concert_start={concert.concert_start}
             venue={concert.venue} // venue adalah objek, ConcertCard akan menangani venue.name
             link_poster={concert.link_poster}
-            // Backend Anda menambahkan `min_price` ke setiap objek konser melalui transformasi
-            // Jadi, kita bisa langsung menggunakan concert.min_price
+            // Teruskan min_price sebagai prop 'price' dan max_price sebagai prop 'max_price'
             price={concert.min_price !== undefined ? concert.min_price : 0}
+            max_price={concert.max_price !== undefined ? concert.max_price : 0} // <-- TAMBAHKAN INI
+            // Pastikan ini sudah ada dan benar:
+            description={concert.description} //
+            link_venue={concert.link_venue}   //
           />
         ))}
       </div>
@@ -57,7 +58,6 @@ const ConcertGrid = ({ concerts, paginationData, currentPage, onPageChange }) =>
           </button>
 
           {/* Logika untuk menampilkan nomor halaman */}
-          {/* Sederhana: tampilkan semua halaman. Untuk banyak halaman, pertimbangkan ellipsis */}
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
@@ -98,7 +98,7 @@ ConcertGrid.propTypes = {
   concerts: PropTypes.arrayOf(PropTypes.object).isRequired,
   paginationData: PropTypes.shape({
     current_page: PropTypes.number,
-    data: PropTypes.array, // Array konser untuk halaman ini (sebenarnya sudah di `props.concerts`)
+    data: PropTypes.array,
     first_page_url: PropTypes.string,
     from: PropTypes.number,
     last_page: PropTypes.number,
@@ -110,12 +110,13 @@ ConcertGrid.propTypes = {
     prev_page_url: PropTypes.string,
     to: PropTypes.number,
     total: PropTypes.number,
-  }), // Bisa null jika belum ada data
+   description: PropTypes.string, // Tambahkan ini
+    link_venue: PropTypes.string   // Tambahkan ini
+  }),
   currentPage: PropTypes.number.isRequired,
   onPageChange: PropTypes.func.isRequired,
 };
 
-// Default props untuk paginationData agar tidak error jika null saat render awal
 ConcertGrid.defaultProps = {
     paginationData: null,
 };

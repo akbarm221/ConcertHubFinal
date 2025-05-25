@@ -52,7 +52,7 @@ function App() {
             } 
           />
           <Route 
-            path="/order" 
+            path="/booking/:concertId" 
             element={
               <PrivateRoute>
                 <TicketBookingMain />

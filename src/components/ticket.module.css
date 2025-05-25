@@ -2,7 +2,7 @@
   background-image: url('../assets/ticket-polos.png');
   background-size: cover;
   background-position: center;
-  width: 85%;
+  width: 95%;
   height: 100%;
   border-radius: 16px;
   display: flex;
@@ -12,7 +12,7 @@
 
 .ticketLeft {
   flex: 1;
-  padding: 24px;
+  padding: 36px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -21,7 +21,7 @@
 
 .ticketRight {
   position: relative;
-  width: 30%;
+  width: 50%;
 }
 
 .ticketImage {

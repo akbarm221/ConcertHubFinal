@@ -1,23 +1,21 @@
 // src/components/ConcertCard.jsx
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
-import date_logo from '../assets/calender_black.svg'; // Pastikan path asset benar
-import location_logo from '../assets/location_black.svg'; // Pastikan path asset benar
-import AuthModal from './AuthModal/AuthModal'; // Pastikan path komponen AuthModal benar
 import { useNavigate } from 'react-router-dom';
+import date_logo from '../assets/calender_black.svg';
+import location_logo from '../assets/location_black.svg';
+import AuthModal from './AuthModal/AuthModal';
 
-const ConcertCard = ({ id, name, concert_start, venue, link_poster, price }) => {
+// Props 'description' dan 'link_venue' ditambahkan
+const ConcertCard = ({ id, name, concert_start, venue, link_poster, price, max_price, description, link_venue }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
-  // const [userData, setUserData] = useState(null); // setUserData tidak dipanggil, bisa dihapus jika tidak digunakan
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    // const storedUserData = localStorage.getItem('userData'); // Jika Anda menyimpan user data
     if (token) {
       setIsUserLoggedIn(true);
-      // if (storedUserData) setUserData(JSON.parse(storedUserData));
     } else {
       setIsUserLoggedIn(false);
     }
@@ -28,20 +26,20 @@ const ConcertCard = ({ id, name, concert_start, venue, link_poster, price }) => 
       return priceValue;
     }
     if (typeof priceValue === 'string') {
-      const numericString = priceValue.replace(/[^0-9]/g, ''); // Hanya angka
-      return parseInt(numericString, 10) || 0; // Default ke 0 jika NaN
+      const numericString = priceValue.replace(/[^0-9]/g, '');
+      return parseInt(numericString, 10) || 0;
     }
-    return 0; // Default untuk tipe lain atau undefined/null
+    return 0;
   };
 
-  const numericPrice = parsePrice(price);
+  const numericMinPrice = parsePrice(price);
+  const numericMaxPrice = parsePrice(max_price);
 
   const formatConcertDate = (dateTimeString) => {
     if (!dateTimeString) return 'N/A';
     try {
-      // Menggunakan 'id-ID' untuk format Indonesia jika diinginkan, atau 'en-US'
       const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
-      return new Date(dateTimeString).toLocaleDateString('id-ID', options).replace(/\./g, ':'); // Ganti titik dengan : untuk waktu
+      return new Date(dateTimeString).toLocaleDateString('id-ID', options).replace(/\./g, ':');
     } catch (e) {
       console.error("Invalid date format:", dateTimeString, e);
       return "Invalid Date";
@@ -52,29 +50,33 @@ const ConcertCard = ({ id, name, concert_start, venue, link_poster, price }) => 
     if (!isUserLoggedIn) {
       setIsAuthModalOpen(true);
     } else {
-      // Navigasi ke halaman booking dengan ID konser jika diperlukan
-      navigate(`/booking/${id}`); // Contoh: navigasi ke halaman booking
-      // navigate('/testing'); // Sesuai kode Anda sebelumnya
+      // Saat navigasi, sertakan 'description' dan 'link_venue' dalam state
+      navigate(`/booking/${id}`, {
+        state: {
+          concertName: name, // Opsional, jika ingin nama juga dikirim
+          concertDescription: description,
+          venueMapImageUrl: link_venue, // 'link_venue' dari API akan digunakan sebagai 'venueMapImageUrl'
+        }
+      });
     }
   };
 
-  const handleAuthSuccess = (authDataResponse, authType) => { // Ganti nama parameter agar tidak bentrok
+  const handleAuthSuccess = (authDataResponse, authType) => {
     console.log(`${authType} berhasil:`, authDataResponse);
     if (authDataResponse.token) {
       localStorage.setItem('token', authDataResponse.token);
     }
-    // if (authDataResponse.user) { // Jika API mengembalikan objek user
-    //   localStorage.setItem('userData', JSON.stringify(authDataResponse.user));
-    //   setUserData(authDataResponse.user);
-    // }
     setIsUserLoggedIn(true);
     setIsAuthModalOpen(false);
-    // Ganti alert dengan notifikasi yang lebih baik jika memungkinkan
     alert(`${authType === 'login' ? 'Login' : 'Registrasi'} berhasil! Anda sekarang dapat melakukan booking.`);
-
-    // Langsung navigasi ke halaman booking setelah login/register berhasil
-    navigate(`/booking/${id}`); // Contoh
-    // navigate('/testing');
+    // Navigasi setelah login/registrasi berhasil, juga dengan state
+    navigate(`/booking/${id}`, {
+        state: {
+          concertName: name,
+          concertDescription: description,
+          venueMapImageUrl: link_venue,
+        }
+      });
   };
 
   const handleCloseModal = () => {
@@ -84,7 +86,16 @@ const ConcertCard = ({ id, name, concert_start, venue, link_poster, price }) => 
   const venueName = venue && venue.name ? venue.name : 'Unknown Venue';
   const posterUrl = link_poster && (link_poster.startsWith('http://') || link_poster.startsWith('https://'))
   ? link_poster
-  : '/default-placeholder.jpg'; // Ganti dengan asset lokal yang kamu miliki
+  : '/default-placeholder.jpg'; // Pastikan ada gambar placeholder ini di folder public Anda
+
+  const displayPrice = () => {
+    const formattedMinPrice = numericMinPrice.toLocaleString('id-ID');
+    if (numericMaxPrice > 0 && numericMaxPrice > numericMinPrice) {
+      const formattedMaxPrice = numericMaxPrice.toLocaleString('id-ID');
+      return `IDR ${formattedMinPrice} - ${formattedMaxPrice}`;
+    }
+    return `IDR ${formattedMinPrice}`;
+  };
 
   return (
     <>
@@ -112,13 +123,21 @@ const ConcertCard = ({ id, name, concert_start, venue, link_poster, price }) => 
             <span className="truncate" title={venueName}>{venueName}</span>
           </div>
 
+          {/* Anda bisa menampilkan deskripsi singkat di sini jika mau, contoh:
+          {description && (
+            <p className="text-xs text-gray-500 mt-1 truncate">
+              {description}
+            </p>
+          )}
+          */}
+
           <div className="flex-grow"></div> {/* Spacer */}
 
           <div className="pt-2 sm:pt-3 space-y-1">
             <div className="text-xs text-gray-500">Mulai dari</div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
-              <p className="text-lg sm:text-xl font-bold text-purple-700">
-                IDR {numericPrice.toLocaleString('id-ID')}
+              <p className="text-sm sm:text-base font-bold text-purple-700 whitespace-nowrap mr-2">
+                {displayPrice()}
               </p>
               <button
                 onClick={handleBookNowClick}
@@ -135,7 +154,7 @@ const ConcertCard = ({ id, name, concert_start, venue, link_poster, price }) => 
         <AuthModal
           isOpen={isAuthModalOpen}
           onClose={handleCloseModal}
-          onAuthSuccess={handleAuthSuccess} // Pastikan nama prop sesuai dengan yang diharapkan AuthModal
+          onAuthSuccess={handleAuthSuccess}
         />
       )}
     </>
@@ -145,20 +164,25 @@ const ConcertCard = ({ id, name, concert_start, venue, link_poster, price }) => 
 ConcertCard.propTypes = {
   id: PropTypes.number.isRequired,
   name: PropTypes.string.isRequired,
-  concert_start: PropTypes.string, // Bisa jadi null/undefined jika API tidak selalu mengirimkannya
+  concert_start: PropTypes.string,
   venue: PropTypes.shape({
-    name: PropTypes.string, // Bisa jadi null/undefined
+    name: PropTypes.string,
   }),
   link_poster: PropTypes.string,
-  price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]), // Bisa jadi null/undefined
+  price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  max_price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  description: PropTypes.string, // PropType untuk description
+  link_venue: PropTypes.string,  // PropType untuk link_venue
 };
 
-// Default props untuk menghindari error jika ada prop yang tidak terdefinisi
 ConcertCard.defaultProps = {
   concert_start: 'N/A',
   venue: { name: 'Unknown Venue' },
-  link_poster: '/default-placeholder.jpg',
+  link_poster: '/default-placeholder.jpg', // Pastikan gambar ini ada di public
   price: 0,
+  max_price: 0,
+  description: 'Deskripsi konser tidak tersedia.', // Default untuk description
+  link_venue: '', // Default untuk link_venue (misal: string kosong atau URL placeholder)
 };
 
 export default ConcertCard;

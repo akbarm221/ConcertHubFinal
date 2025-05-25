@@ -1,29 +1,11 @@
 // src/components/TicketBookingPage.jsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import ImageModal from './ImageModal'; 
-import concertImg from '../assets/concert-bg.jpg'
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import axios from 'axios';
+import ImageModal from './ImageModal';
+import concertImgFallback from '../assets/concert-bg.jpg';
 
-// --- Mock Data ---
-const mockConcertInfo = {
-  id: 101,
-  name: 'YOASOBI LIVE IN JAKARTA - ASIA TOUR 2024',
-  venueName: 'Istora Senayan, GBK',
-  date: '16 JAN 2024',
-  description: 'Jogjajanan 2025 adalah salah satu program kerja Keluarga Mahasiswa Sosial Ekonomi Pertanian Universitas Gadjah Mada yang telah menjadi event ikonik di Jogja. Tahun ini, Jogjajanan kembali hadir dengan tema "general: Nada Bernada" dan tagline "Feel The Rhythm, Live The Moment". Tiap melodi lantunan momen tak terlupakan untuk Jogmates tercinta. Pada edisi ketujuh ini Jogjajanan akan menghadirkan rangkaian acara yang seru dan beragam, mulai dari deretan food tenant yang menawarkan berbagai pilihan kuliner, konser musik spektakuler dengan penampilan dari Guest Star yang memukau, hingga Pojok Dolanan yang menghadirkan permainan tradisional penuh nostalgia. Tak hanya itu, Jogjajanan 2025 juga dimeriahkan dengan berbagai kompetisi seperti Kompetisi Reels dan Business Plan Competition, serta dilengkapi dengan Art Spot yang instagramable dan penuh inspirasi. Jangan lewatkan keseruan dan segera amankan tiketmu!',
-  venueMapImageUrl: concertImg 
-};
-
-const mockTicketTypes = [
-  { id: 1, concertId: 101, name: 'Presale 1 (Regular)', price: 125000, quota: 500, description: 'Ticket description goes here...' },
-  { id: 2, concertId: 101, name: 'Presale 2 (Regular)', price: 135000, quota: 300, description: 'Another ticket description here...' },
-  { id: 3, concertId: 101, name: 'Presale 3 (Regular)', price: 145000, quota: 200, description: 'Description for presale 3.' },
-  { id: 4, concertId: 101, name: 'Presale X (Premium)', price: 500000, quota: 50, description: 'Premium ticket benefits included.' },
-];
-
-const SERVICE_FEE = 21000;
-const MOCK_USER_ID = 'userXYZ789';
-
+// Komponen TicketItem (tidak ada perubahan pada logikanya, hanya tampilan deskripsi tiket yg dihilangkan)
 function TicketItem({ ticket, quantity, onQuantityChange, maxQuota }) {
   const handleIncrement = () => {
     if (quantity < maxQuota) {
@@ -51,7 +33,7 @@ function TicketItem({ ticket, quantity, onQuantityChange, maxQuota }) {
         <div className="mb-3 sm:mb-0 sm:mr-4 flex-grow">
           <h3 className="text-md font-semibold text-gray-800">{ticket.name}</h3>
           <p className="text-purple-600 font-bold text-sm">IDR {ticket.price.toLocaleString()}</p>
-          {ticket.description && <p className="text-xs text-gray-500 mt-1">{ticket.description}</p>}
+          {/* Deskripsi tiket dihilangkan dari tampilan */}
         </div>
         <div className="flex items-center space-x-2 flex-shrink-0 mt-2 sm:mt-0">
           {quantity > 0 ? (
@@ -93,43 +75,103 @@ function TicketItem({ ticket, quantity, onQuantityChange, maxQuota }) {
   );
 }
 
+// const MOCK_USER_ID = 'userXYZ789'; // Tidak digunakan lagi jika user ID diambil dari token di backend
+
 function TicketBookingPage() {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // navigate tidak digunakan di handleSubmitOrder baru, bisa dihapus jika tidak ada kegunaan lain
+  const location = useLocation();
+  const { concertId: concertIdFromParams } = useParams();
+
   const [concertInfo, setConcertInfo] = useState(null);
   const [availableTickets, setAvailableTickets] = useState([]);
   const [selectedTickets, setSelectedTickets] = useState({});
   const [totalPrice, setTotalPrice] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // Loading untuk data awal & submit order
+  const [error, setError] = useState(null);
 
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [currentModalImageUrl, setCurrentModalImageUrl] = useState('');
   const [currentModalImageAlt, setCurrentModalImageAlt] = useState('');
 
   useEffect(() => {
+    let isMounted = true; // Flag untuk mencegah update state jika komponen unmount
     setIsLoading(true);
-    setTimeout(() => {
-      setConcertInfo(mockConcertInfo);
-      const relevantTickets = mockTicketTypes.filter(ticket => ticket.concertId === mockConcertInfo.id);
-      setAvailableTickets(relevantTickets);
+    setError(null);
+    const routeState = location.state;
+    let currentConcertId = concertIdFromParams ? parseInt(concertIdFromParams) : null;
 
-      if (relevantTickets.length > 0 && relevantTickets.find(t => t.id === 1)) {
-         setSelectedTickets({ 1: 1 });
+    const concertDetails = {
+      id: currentConcertId,
+      name: routeState?.concertName || (currentConcertId ? `Konser #${currentConcertId}` : 'Nama Konser Tidak Diketahui'),
+      description: routeState?.concertDescription || 'Deskripsi untuk konser ini belum tersedia.',
+      venueMapImageUrl: routeState?.venueMapImageUrl || concertImgFallback,
+      venueName: routeState?.venueName || (currentConcertId ? `Venue Konser #${currentConcertId}` : 'Venue Tidak Diketahui'),
+      date: routeState?.date || 'Tanggal Konser (Ambil dari API)',
+    };
+    if (isMounted) {
+      setConcertInfo(concertDetails);
+    }
+    
+
+    const fetchTickets = async () => {
+      if (!currentConcertId) {
+        if (isMounted) {
+            setError("ID Konser tidak valid untuk mengambil tiket.");
+            setAvailableTickets([]);
+            setIsLoading(false);
+        }
+        return;
       }
-      setIsLoading(false);
-    }, 500);
-  }, []);
+      try {
+        const response = await axios.get(`http://localhost:8080/tickets?concert_id=${currentConcertId}`);
+        if (isMounted) {
+            if (response.data && response.data.status === 'success' && Array.isArray(response.data.data)) {
+            setAvailableTickets(response.data.data);
+            } else {
+            console.error("Format respons API tiket tidak sesuai:", response.data);
+            setError("Gagal memuat jenis tiket: format data tidak sesuai.");
+            setAvailableTickets([]);
+            }
+        }
+      } catch (err) {
+        if (isMounted) {
+            console.error("Gagal mengambil data tiket:", err);
+            setError(err.response?.data?.message || "Terjadi kesalahan saat mengambil data tiket.");
+            setAvailableTickets([]);
+        }
+      } finally {
+        if (isMounted) {
+            setIsLoading(false);
+        }
+      }
+    };
+
+    if (currentConcertId) {
+      fetchTickets();
+    } else {
+      if (isMounted) {
+        setError("Tidak ada ID konser yang diberikan untuk memuat tiket.");
+        setAvailableTickets([]);
+        setIsLoading(false);
+      }
+    }
+    return () => { // Cleanup function
+        isMounted = false;
+    };
+  }, [location.state, concertIdFromParams]);
 
   const handleQuantityChange = (ticketId, newQuantity) => {
     const ticketInfo = availableTickets.find(t => t.id === ticketId);
     if (!ticketInfo) return;
-    const quantity = Math.min(Math.max(0, newQuantity), ticketInfo.quota);
+    const maxQuota = typeof ticketInfo.quota === 'number' && ticketInfo.quota > 0 ? ticketInfo.quota : 0;
+    const quantity = Math.min(Math.max(0, newQuantity), maxQuota);
 
     setSelectedTickets(prevSelected => {
       const updatedSelected = { ...prevSelected };
       if (quantity > 0) {
         updatedSelected[ticketId] = quantity;
       } else {
-        delete updatedSelected[ticketId]; 
+        delete updatedSelected[ticketId];
       }
       return updatedSelected;
     });
@@ -143,7 +185,7 @@ function TicketBookingPage() {
         currentSubtotal += ticketInfo.price * selectedTickets[ticketId];
       }
     }
-    setTotalPrice(currentSubtotal > 0 ? currentSubtotal + SERVICE_FEE : 0);
+    setTotalPrice(currentSubtotal); // Total harga tanpa biaya layanan
   }, [selectedTickets, availableTickets]);
 
   const handleSubmitOrder = async () => {
@@ -151,48 +193,61 @@ function TicketBookingPage() {
       alert("Silakan pilih minimal satu tiket.");
       return;
     }
-
-    const newPurchasedTickets = [];
-    const orderId = `ORD-${Date.now()}`; // Buat ID Pesanan unik sederhana
-    const orderTime = new Date().toISOString();
-
-    for (const ticketIdStr in selectedTickets) {
-      const ticketId = parseInt(ticketIdStr);
-      const quantity = selectedTickets[ticketId];
-      const ticketInfo = availableTickets.find(t => t.id === ticketId);
-
-      if (ticketInfo) {
-        
-        for (let i = 0; i < quantity; i++) {
-          newPurchasedTickets.push({
-            uniqueTicketId: `${orderId}-${ticketId}-${i}`, 
-            orderId: orderId,
-            concertId: concertInfo?.id,
-            concertName: concertInfo?.name || "Nama Konser Tidak Diketahui",
-            ticketId: ticketInfo.id,
-            ticketName: ticketInfo.name,
-            ticketPrice: ticketInfo.price,
-            orderTime: orderTime,
-            status: 'Berhasil', 
-            userId: MOCK_USER_ID,
-          });
-        }
-      }
+    if (!concertInfo) {
+      alert("Informasi konser tidak termuat, tidak dapat melanjutkan pesanan.");
+      return;
     }
 
+    setIsLoading(true);
+    setError(null);
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert("Anda belum login atau sesi Anda telah habis. Silakan login kembali.");
+      setIsLoading(false);
+      return;
+    }
+
+    const ticketsForAPI = Object.entries(selectedTickets).map(([ticketId, quantity]) => ({
+      ticket_id: parseInt(ticketId),
+      quantity: quantity,
+    }));
+
+    const requestBody = {
+      tickets: ticketsForAPI,
+    };
+
     try {
-      const existingTicketsJSON = localStorage.getItem('myPurchasedTickets');
-      const existingTickets = existingTicketsJSON ? JSON.parse(existingTicketsJSON) : [];
-      const updatedTickets = [...existingTickets, ...newPurchasedTickets];
-      localStorage.setItem('myPurchasedTickets', JSON.stringify(updatedTickets));
+      console.log(token)
+      const response = await axios.post(
+        'http://localhost:8080/ticket-orders',
+        requestBody,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        }
+      );
 
-      alert(`Pesanan dengan ID ${orderId} berhasil! Total: IDR ${totalPrice.toLocaleString()}. Anda akan diarahkan ke halaman Tiket Saya.`);
-      setSelectedTickets({}); 
-      navigate('/testing'); 
-
-    } catch (error) {
-      console.error("Gagal menyimpan tiket ke localStorage atau navigasi:", error);
-      alert("Terjadi kesalahan saat memproses pesanan Anda. Silakan coba lagi.");
+      if (response.data && response.data.snap_url) {
+        // Pengguna akan diarahkan, jadi tidak perlu alert atau reset state di sini
+        // yang mungkin akan hilang saat redirect.
+        window.location.href = response.data.snap_url;
+      } else {
+        console.error("Respon sukses namun tidak ada snap_url:", response.data);
+        const message = "Gagal memproses pembayaran: informasi pembayaran tidak lengkap dari server.";
+        setError(message);
+        alert(message);
+      }
+    } catch (err) {
+      console.error("Gagal membuat pesanan tiket:", err.response ? err.response.data : err.message);
+      const apiErrorMessage = err.response?.data?.message || "Terjadi kesalahan pada server saat membuat pesanan.";
+      setError(apiErrorMessage);
+      alert(`Gagal membuat pesanan: ${apiErrorMessage}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -208,45 +263,71 @@ function TicketBookingPage() {
     setCurrentModalImageAlt('');
   };
 
-  if (isLoading) {
-    return <div className="flex justify-center items-center min-h-screen text-xl">Memuat...</div>;
+  // --- JSX untuk Render ---
+  if (isLoading && !concertInfo && availableTickets.length === 0) { // Kondisi loading awal
+    return <div className="flex justify-center items-center min-h-screen text-xl">Memuat data...</div>;
   }
 
-  if (!concertInfo || (availableTickets.length === 0 && !isLoading)) {
-    return <div className="text-center p-10 text-red-500">Gagal memuat data konser atau tiket tidak tersedia.</div>;
+  if (!concertInfo && !isLoading) { // Jika concertInfo gagal dimuat (seharusnya jarang terjadi jika ID ada)
+      return <div className="text-center p-10 text-red-500">Gagal memuat informasi konser dasar.</div>;
   }
+
+  // Menampilkan pesan error utama jika ada, setelah loading selesai & tiket gagal dimuat
+  if (error && availableTickets.length === 0 && !isLoading) {
+    return (
+      <div className="container mx-auto max-w-3xl py-8 px-4 text-center">
+        <div className="bg-white p-6 rounded-xl shadow-lg">
+          <h2 className="text-xl font-semibold text-red-600 mb-3">Oops! Terjadi Kesalahan</h2>
+          <p className="text-gray-700">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="bg-gray-100 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Kolom Kiri */}
           <div className="lg:col-span-2 space-y-6">
-            <section className="bg-white p-6 rounded-xl shadow-lg">
-              <h2 className="text-xl font-semibold mb-3 text-gray-700">Venue Information</h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                {concertInfo.description}
-              </p>
-            </section>
+            {concertInfo && (
+              <section className="bg-white p-6 rounded-xl shadow-lg">
+                <h1 className="text-2xl font-bold text-gray-900 mb-1">{concertInfo.name}</h1>
+                <p className="text-sm text-gray-500 mb-3">{concertInfo.date} | {concertInfo.venueName}</p>
+                <h2 className="text-xl font-semibold mb-3 text-gray-700">Informasi Konser & Venue</h2>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {concertInfo.description}
+                </p>
+              </section>
+            )}
 
             <section className="bg-transparent p-0">
-              <h2 className="text-xl font-semibold mb-4 text-gray-700">Ticket Category</h2>
-              {availableTickets.map(ticket => (
-                <TicketItem
-                  key={ticket.id}
-                  ticket={ticket}
-                  quantity={selectedTickets[ticket.id] || 0}
-                  onQuantityChange={handleQuantityChange}
-                  maxQuota={ticket.quota}
-                />
-              ))}
+              <h2 className="text-xl font-semibold mb-4 text-gray-700">Kategori Tiket</h2>
+              {isLoading && availableTickets.length === 0 && !error ? ( // Loading spesifik untuk tiket
+                 <div className="bg-white rounded-xl shadow-lg p-6 text-center text-gray-500">Memuat tiket...</div>
+              ) : availableTickets.length > 0 ? (
+                availableTickets.map(ticket => (
+                  <TicketItem
+                    key={ticket.id}
+                    ticket={ticket}
+                    quantity={selectedTickets[ticket.id] || 0}
+                    onQuantityChange={handleQuantityChange}
+                    maxQuota={ticket.quota}
+                  />
+                ))
+              ) : (
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                 <p className="text-gray-500 text-center py-4">
+                    {error ? `Tidak dapat memuat tiket: ${error}` : "Tiket untuk konser ini belum tersedia atau sudah habis."}
+                 </p>
+                </div>
+              )}
             </section>
           </div>
 
-          
           <div className="lg:col-span-1 space-y-6">
-            <section className="bg-white p-6 rounded-xl shadow-lg  top-6">
-              <h2 className="text-lg font-semibold mb-4 text-gray-700">Order Details</h2>
+            <section className="bg-white p-6 rounded-xl shadow-lg top-6">
+              <h2 className="text-lg font-semibold mb-4 text-gray-700">Detail Pesanan</h2>
               {Object.keys(selectedTickets).length === 0 ? (
                 <p className="text-gray-500 text-sm text-center py-3">Belum ada tiket yang dipilih.</p>
               ) : (
@@ -263,10 +344,7 @@ function TicketBookingPage() {
                       </li>
                     );
                   })}
-                  <li className="flex justify-between items-center border-t border-gray-200 pt-2 mt-2 text-xs">
-                    <span className="text-gray-600">Service Fee</span>
-                    <span className="text-gray-800 font-medium">IDR {SERVICE_FEE.toLocaleString()}</span>
-                  </li>
+                  {/* Biaya layanan sudah dihapus dari sini */}
                 </ul>
               )}
               <div className="border-t border-gray-200 pt-3">
@@ -276,29 +354,30 @@ function TicketBookingPage() {
                 </div>
                 <button
                   onClick={handleSubmitOrder}
-                  disabled={Object.keys(selectedTickets).length === 0 || totalPrice === 0 || isLoading}
+                  disabled={Object.keys(selectedTickets).length === 0 || totalPrice === 0 || isLoading || availableTickets.length === 0 && !error}
                   className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-4 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? 'Processing...' : 'Confirm Payment'}
+                  {/* Ubah teks tombol jika isLoading karena submit order */}
+                  {isLoading && Object.keys(selectedTickets).length > 0 ? 'Memproses Pembayaran...' : 'Konfirmasi Pembayaran'}
                 </button>
               </div>
             </section>
 
-            {concertInfo.venueMapImageUrl && (
+            {concertInfo && concertInfo.venueMapImageUrl && concertInfo.venueMapImageUrl !== concertImgFallback && (
               <section className="bg-white p-4 rounded-xl shadow-lg">
-                <h2 className="text-lg font-semibold mb-3 text-gray-700">Venue Map</h2>
+                <h2 className="text-lg font-semibold mb-3 text-gray-700">Peta Venue</h2>
                 <div
                   className="cursor-pointer hover:opacity-80 transition-opacity rounded-md overflow-hidden"
-                  onClick={() => openImageModal( concertInfo.venueMapImageUrl, `Peta venue ${concertInfo.venueName}`)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openImageModal( concertInfo.venueMapImageUrl, `Peta venue ${concertInfo.venueName}`); }}
+                  onClick={() => openImageModal(concertInfo.venueMapImageUrl, `Peta venue untuk ${concertInfo.name}`)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openImageModal(concertInfo.venueMapImageUrl, `Peta venue untuk ${concertInfo.name}`); }}
                   tabIndex={0}
                   role="button"
-                  aria-label={`Lihat peta venue ${concertInfo.venueName} lebih besar`}
+                  aria-label={`Lihat peta venue ${concertInfo.name} lebih besar`}
                 >
                   <img
-                    src={ concertInfo.venueMapImageUrl}
-                    alt={`Peta venue ${concertInfo.venueName}`}
-                    className="w-full h-auto object-contain"
+                    src={concertInfo.venueMapImageUrl}
+                    alt={`Peta venue ${concertInfo.venueName || concertInfo.name}`}
+                    className="w-full h-auto object-contain rounded-md"
                   />
                 </div>
               </section>
