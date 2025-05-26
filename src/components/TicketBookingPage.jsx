@@ -292,8 +292,6 @@ function TicketBookingPage() {
           <div className="lg:col-span-2 space-y-6">
             {concertInfo && (
               <section className="bg-white p-6 rounded-xl shadow-lg">
-                <h1 className="text-2xl font-bold text-gray-900 mb-1">{concertInfo.name}</h1>
-                <p className="text-sm text-gray-500 mb-3">{concertInfo.date} | {concertInfo.venueName}</p>
                 <h2 className="text-xl font-semibold mb-3 text-gray-700">Informasi Konser & Venue</h2>
                 <p className="text-gray-600 text-sm leading-relaxed">
                   {concertInfo.description}
