@@ -123,7 +123,7 @@ function TicketBookingPage() {
         return;
       }
       try {
-        const response = await axios.get(`http://localhost:8080/tickets?concert_id=${currentConcertId}`);
+        const response = await axios.get(`http://localhost:5000/tickets?concert_id=${currentConcertId}`);
         if (isMounted) {
             if (response.data && response.data.status === 'success' && Array.isArray(response.data.data)) {
             setAvailableTickets(response.data.data);
@@ -220,7 +220,7 @@ function TicketBookingPage() {
     try {
       console.log(token)
       const response = await axios.post(
-        'http://localhost:8080/ticket-orders',
+        'http://localhost:5000/ticket-orders',
         requestBody,
         {
           headers: {

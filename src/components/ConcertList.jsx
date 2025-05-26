@@ -3,7 +3,7 @@ import axios from 'axios';
 import PropTypes from 'prop-types'; // Pastikan PropTypes diimpor
 import ConcertGrid from './ConcertGrid';
 
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'http://localhost:5000';
 const ITEMS_PER_PAGE = 6;
 
 // Nilai default untuk rentang jika hanya satu sisi yang disediakan

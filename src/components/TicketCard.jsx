@@ -80,7 +80,7 @@ const TicketCard = ({ ticket, onDelete }) => {
       const token = localStorage.getItem("token");
       try {
         const response = await axios.get(
-          `http://localhost:8080/venues/${venueId}`,
+          `http://localhost:5000/venues/${venueId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -175,10 +175,10 @@ const TicketCard = ({ ticket, onDelete }) => {
                 orderStatus === "Lunas" ||
                 orderStatus === "Berhasil" ||
                 orderStatus === "Selesai"
-                  ? "green"
+                  ? "black"
                   : orderStatus === "Menunggu Pembayaran"
-                  ? "orange"
-                  : "red",
+                  ? "black"
+                  : "black",
             }}
           >
             {orderStatus}

@@ -14,6 +14,7 @@ import TicketCard from './components/TicketCard';
 import TestingTicketPage from './pages/TestingTicketPage';
 // Import PrivateRoute yang baru kita buat
 import PrivateRoute from './components/PrivateRoute'; 
+import OAuthCallback from './components/AuthModal/OAuthCallback';
 
 function App() {
   return (
@@ -25,7 +26,7 @@ function App() {
         <Routes>
          
           <Route path="/" element={<HomePage />} />
-          
+          <Route path="/oauth/callback" element={<OAuthCallback />} />
           {/* Rute-rute yang dilindungi: Bungkus dengan PrivateRoute */}
           <Route 
             path="/ticketdesign" 

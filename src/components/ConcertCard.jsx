@@ -1,13 +1,15 @@
-// src/components/ConcertCard.jsx
+// File: src/components/ConcertCard.jsx
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import date_logo from '../assets/calender_black.svg';
 import location_logo from '../assets/location_black.svg';
+// Jika Anda memiliki ikon khusus untuk genre, Anda bisa mengimpornya di sini:
+// import genre_icon from '../assets/genre_icon.svg';
 import AuthModal from './AuthModal/AuthModal';
 
-// Props 'description' dan 'link_venue' ditambahkan
-const ConcertCard = ({ id, name, concert_start, venue, link_poster, price, max_price, description, link_venue }) => {
+// Tambahkan 'genres' ke daftar props yang di-destructure
+const ConcertCard = ({ id, name, concert_start, venue, link_poster, price, max_price, description, link_venue, genres }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const navigate = useNavigate();
@@ -50,12 +52,11 @@ const ConcertCard = ({ id, name, concert_start, venue, link_poster, price, max_p
     if (!isUserLoggedIn) {
       setIsAuthModalOpen(true);
     } else {
-      // Saat navigasi, sertakan 'description' dan 'link_venue' dalam state
       navigate(`/booking/${id}`, {
         state: {
-          concertName: name, // Opsional, jika ingin nama juga dikirim
+          concertName: name,
           concertDescription: description,
-          venueMapImageUrl: link_venue, // 'link_venue' dari API akan digunakan sebagai 'venueMapImageUrl'
+          venueMapImageUrl: link_venue,
         }
       });
     }
@@ -69,7 +70,6 @@ const ConcertCard = ({ id, name, concert_start, venue, link_poster, price, max_p
     setIsUserLoggedIn(true);
     setIsAuthModalOpen(false);
     alert(`${authType === 'login' ? 'Login' : 'Registrasi'} berhasil! Anda sekarang dapat melakukan booking.`);
-    // Navigasi setelah login/registrasi berhasil, juga dengan state
     navigate(`/booking/${id}`, {
         state: {
           concertName: name,
@@ -123,13 +123,21 @@ const ConcertCard = ({ id, name, concert_start, venue, link_poster, price, max_p
             <span className="truncate" title={venueName}>{venueName}</span>
           </div>
 
-          {/* Anda bisa menampilkan deskripsi singkat di sini jika mau, contoh:
-          {description && (
-            <p className="text-xs text-gray-500 mt-1 truncate">
-              {description}
-            </p>
+          {/* Menampilkan Genre */}
+          {/* Pastikan genres ada dan tidak kosong */}
+          {genres && genres.length > 0 && (
+            <div className="flex items-start text-xs sm:text-sm text-gray-500 mt-1">
+              {/* Opsional: Tambahkan ikon untuk genre di sini jika ada */}
+              {/* <img src={genre_icon} alt="Genre" className="w-4 h-4 mr-2 flex-shrink-0 mt-px" /> */}
+              <span className="flex flex-wrap gap-x-2 gap-y-1"> {/* Menggunakan flex-wrap jika genre terlalu banyak dan memberi jarak antar genre */}
+                {genres.map((genre, index) => (
+                  <span key={genre.id || index} className="font-medium text-purple-600 bg-purple-100 px-1.5 py-0.5 rounded-md"> {/* Styling untuk setiap genre tag */}
+                    {genre.name}
+                  </span>
+                ))}
+              </span>
+            </div>
           )}
-          */}
 
           <div className="flex-grow"></div> {/* Spacer */}
 
@@ -171,18 +179,25 @@ ConcertCard.propTypes = {
   link_poster: PropTypes.string,
   price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   max_price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  description: PropTypes.string, // PropType untuk description
-  link_venue: PropTypes.string,  // PropType untuk link_venue
+  description: PropTypes.string,
+  link_venue: PropTypes.string,
+  genres: PropTypes.arrayOf( // PropType untuk genres
+    PropTypes.shape({
+      id: PropTypes.number,
+      name: PropTypes.string
+    })
+  ),
 };
 
 ConcertCard.defaultProps = {
   concert_start: 'N/A',
   venue: { name: 'Unknown Venue' },
-  link_poster: '/default-placeholder.jpg', // Pastikan gambar ini ada di public
+  link_poster: '/default-placeholder.jpg',
   price: 0,
   max_price: 0,
-  description: 'Deskripsi konser tidak tersedia.', // Default untuk description
-  link_venue: '', // Default untuk link_venue (misal: string kosong atau URL placeholder)
+  description: 'Deskripsi konser tidak tersedia.',
+  link_venue: '',
+  genres: [], // Default props untuk genres adalah array kosong
 };
 
 export default ConcertCard;

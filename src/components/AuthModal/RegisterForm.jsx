@@ -59,7 +59,7 @@ const RegisterForm = ({ onSuccess }) => {
     const formattedDob = `${dobYear}-${dobMonth}-${dobDay}`;
 
     try {
-      const response = await axios.post('http://localhost:8080/register', {
+      const response = await axios.post('http://localhost:5000/register', {
         username,
         email,
         password,

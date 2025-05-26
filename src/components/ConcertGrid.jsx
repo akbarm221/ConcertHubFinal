@@ -1,3 +1,5 @@
+// File: ConcertGrid.jsx
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import ConcertCard from './ConcertCard'; // Pastikan path ini benar
@@ -7,6 +9,8 @@ const ConcertGrid = ({ concerts, paginationData, currentPage, onPageChange }) =>
   if (!paginationData && (!concerts || concerts.length === 0)) {
     // Pesan ini bisa ditampilkan oleh ConcertList saat loading atau error,
     // jadi mungkin tidak perlu di sini, atau bisa sebagai fallback.
+    // Jika ingin menampilkan pesan loading/error di sini juga, Anda bisa menambahkan:
+    // return <p className="col-span-full text-center text-gray-500 py-10">Memuat data...</p>;
   }
 
   // Jika array konser kosong SETELAH fetch (tidak ada hasil yang cocok dengan filter)
@@ -34,10 +38,11 @@ const ConcertGrid = ({ concerts, paginationData, currentPage, onPageChange }) =>
             link_poster={concert.link_poster}
             // Teruskan min_price sebagai prop 'price' dan max_price sebagai prop 'max_price'
             price={concert.min_price !== undefined ? concert.min_price : 0}
-            max_price={concert.max_price !== undefined ? concert.max_price : 0} // <-- TAMBAHKAN INI
+            max_price={concert.max_price !== undefined ? concert.max_price : 0}
             // Pastikan ini sudah ada dan benar:
-            description={concert.description} //
-            link_venue={concert.link_venue}   //
+            description={concert.description}
+            link_venue={concert.link_venue}
+            genres={concert.genres || []} // Teruskan genres, default ke array kosong jika undefined
           />
         ))}
       </div>
@@ -95,7 +100,21 @@ const ConcertGrid = ({ concerts, paginationData, currentPage, onPageChange }) =>
 };
 
 ConcertGrid.propTypes = {
-  concerts: PropTypes.arrayOf(PropTypes.object).isRequired,
+  concerts: PropTypes.arrayOf(PropTypes.shape({ // Lebih spesifik dengan PropTypes.shape
+    id: PropTypes.number.isRequired,
+    name: PropTypes.string.isRequired,
+    concert_start: PropTypes.string,
+    venue: PropTypes.object,
+    link_poster: PropTypes.string,
+    min_price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    max_price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    description: PropTypes.string,
+    link_venue: PropTypes.string,
+    genres: PropTypes.arrayOf(PropTypes.shape({ // PropType untuk genres
+        id: PropTypes.number,
+        name: PropTypes.string
+    }))
+  })).isRequired,
   paginationData: PropTypes.shape({
     current_page: PropTypes.number,
     data: PropTypes.array,
@@ -110,8 +129,6 @@ ConcertGrid.propTypes = {
     prev_page_url: PropTypes.string,
     to: PropTypes.number,
     total: PropTypes.number,
-   description: PropTypes.string, // Tambahkan ini
-    link_venue: PropTypes.string   // Tambahkan ini
   }),
   currentPage: PropTypes.number.isRequired,
   onPageChange: PropTypes.func.isRequired,

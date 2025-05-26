@@ -115,22 +115,7 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
           )}
         </div>
 
-        <div className="flex-shrink-0 pt-3 border-t border-gray-200 mt-4">
-          <div className="my-3 flex items-center">
-            <div className="flex-grow border-t border-gray-300"></div>
-            <span className="flex-shrink mx-2 text-gray-400 text-xs">OR</span>
-            <div className="flex-grow border-t border-gray-300"></div>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            className="w-full flex items-center justify-center bg-white text-gray-700 py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 text-sm font-medium"
-          >
-            <GoogleIcon />
-            Continue with Google
-          </button>
-        </div>
+      
       </div>
     </div>
   );

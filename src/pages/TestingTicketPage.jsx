@@ -73,7 +73,7 @@ function MyTicketsPage() {
         // Anda bisa menambahkan parameter filter ke API jika backend mendukungnya
         // misal: `&filter=${activeFilter.toLowerCase().replace(' ', '_')}`
         const response = await axios.get(
-          `http://localhost:8080/orders/me?page=${currentPage}`,
+          `http://localhost:5000/orders/me?page=${currentPage}`,
           {
             headers: {
               'Authorization': `Bearer ${token}`,

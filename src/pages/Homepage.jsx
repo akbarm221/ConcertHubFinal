@@ -7,7 +7,7 @@ import axios from 'axios';
 // Impor SATU ikon yang akan Anda gunakan untuk semua filter genre di Hero
 import CommonGenreIcon from '../assets/logo.svg'; // <-- GANTI PATH INI DENGAN PATH IKON ANDA
 
-const API_BASE_URL = 'http://localhost:8080'; // Sesuaikan jika perlu
+const API_BASE_URL = 'http://localhost:5000'; // Sesuaikan jika perlu
 
 const HomePage = () => {
   const [filters, setFilters] = useState({

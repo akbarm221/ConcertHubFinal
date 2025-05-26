@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios'; // Pastikan axios sudah terinstal (npm install axios)
 import PropTypes from 'prop-types';
 
-const API_BASE_URL = 'http://localhost:8080'; // Sesuaikan jika perlu
+const API_BASE_URL = 'http://localhost:5000'; // Sesuaikan jika perlu
 
 // Daftar nama genre konseptual yang ingin kita kecualikan dari filter pilihan
 const CONCEPTUAL_GENRES_TO_EXCLUDE = ["Today", "This Weekend", "Trending"];

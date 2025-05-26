@@ -72,7 +72,7 @@ function MyTicketsPage() {
         // Contoh: /orders/me?page=${currentPage}&status=${activeFilter === 'Upcoming' ? 'paid' : ... }
         // Untuk saat ini, kita hanya menggunakan page
         const response = await axios.get(
-          `http://localhost:8080/orders/me?page=${currentPage}`, // API Endpoint Anda
+          `http://localhost:5000/orders/me?page=${currentPage}`, // API Endpoint Anda
           {
             headers: {
               'Authorization': `Bearer ${token}`,
