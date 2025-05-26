@@ -134,13 +134,13 @@ const LoginForm = ({ onSuccess }) => {
         </button>
       </form>
 
-      <div className="flex items-center my-3">
+      {/* <div className="flex items-center my-3">
         <hr className="flex-grow border-t border-gray-300" />
         <span className="px-2 text-xs text-gray-500 uppercase">Or continue with</span>
         <hr className="flex-grow border-t border-gray-300" />
-      </div>
+      </div> */}
 
-      <button
+      {/* <button
         type="button"
         onClick={handleGoogleLoginClick}
         disabled={isGoogleLoading || isLoading}
@@ -148,7 +148,7 @@ const LoginForm = ({ onSuccess }) => {
       >
         <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M21.892 11.345C21.892 10.605 21.825 9.92 21.705 9.28H12.203V13.17H17.611C17.371 14.435 16.678 15.51 15.656 16.21V18.645H18.919C20.845 16.92 21.892 14.395 21.892 11.345Z" fill="#4285F4"/><path fillRule="evenodd" clipRule="evenodd" d="M12.203 22.0001C15.123 22.0001 17.571 21.0751 18.919 19.6451L15.656 17.2101C14.683 17.8901 13.541 18.2801 12.203 18.2801C9.60101 18.2801 7.39101 16.6151 6.57101 14.2851H3.18101V16.7801C4.58601 19.9301 8.13101 22.0001 12.203 22.0001Z" fill="#34A853"/><path fillRule="evenodd" clipRule="evenodd" d="M6.57099 14.2851C6.34099 13.5901 6.20299 12.8501 6.20299 12.0751C6.20299 11.3001 6.34099 10.5601 6.57099 9.8651V7.3701L3.18099 8.8801C2.40099 10.0701 2 11.2751 2 12.0751C2 12.8751 2.40099 14.0801 3.18099 15.2701L6.57099 14.2851Z" fill="#FBBC05"/><path fillRule="evenodd" clipRule="evenodd" d="M12.203 5.87C13.643 5.87 14.903 6.375 15.971 7.37L18.984 4.54C17.561 3.26 15.123 2.15 12.203 2.15C8.13101 2.15 4.58601 4.22 3.18101 7.37L6.57101 8.865C7.39101 6.535 9.60101 5.87 12.203 5.87Z" fill="#EA4335"/></svg>
         {isGoogleLoading ? "Mengarahkan..." : "Sign in with Google"}
-      </button>
+      </button> */}
     </div>
   );
 };
