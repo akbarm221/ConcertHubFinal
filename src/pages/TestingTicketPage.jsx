@@ -6,7 +6,7 @@ import axios from 'axios'; // Pastikan axios sudah diinstal
 import HeroMyTicket from '../components/HeroMyTicket'; // Asumsi path ini benar
 import TicketCard from '../components/TicketCard';   // Asumsi path ini benar
 
-// Komponen Filter Sederhana (Tidak ada perubahan dari kode Anda)
+// Komponen Filter Sederhana
 const TicketFilters = ({ onFilterChange, currentActiveFilter }) => {
   const filterNames = ['Upcoming', 'Past Tickets', 'All Transaction History'];
   return (
@@ -64,14 +64,10 @@ function MyTicketsPage() {
           setIsLoading(false);
           setOrders([]);
         }
-        // Opsional: arahkan ke halaman login, contoh: navigate('/login');
         return;
       }
 
       try {
-        // API Endpoint dengan parameter halaman
-        // Anda bisa menambahkan parameter filter ke API jika backend mendukungnya
-        // misal: `&filter=${activeFilter.toLowerCase().replace(' ', '_')}`
         const response = await axios.get(
           `http://localhost:5000/orders/me?page=${currentPage}`,
           {
@@ -120,13 +116,8 @@ function MyTicketsPage() {
   }, [currentPage, activeFilter]); // Re-fetch jika currentPage atau activeFilter berubah
 
   const handleDeleteTicket = (orderIdToDelete) => {
-    // CATATAN: Ini adalah placeholder. Penghapusan idealnya melalui API call ke backend.
-    // Setelah API call berhasil, Anda bisa memanggil fetchOrders lagi atau update state.
     if (window.confirm(`Apakah Anda yakin ingin membatalkan pesanan dengan ID: ${orderIdToDelete}? (Fitur ini mungkin memerlukan integrasi backend)`)) {
       alert(`Fungsi pembatalan/penghapusan pesanan (ID: ${orderIdToDelete}) perlu diimplementasikan dengan API backend.`);
-      // Contoh: setOrders(prevOrders => prevOrders.filter(order => order.id !== orderIdToDelete));
-      // Kemudian, jika Anda mengubah data, idealnya panggil ulang fetchOrders atau
-      // sesuaikan paginationInfo jika jumlah total item berubah signifikan.
     }
   };
 
@@ -138,27 +129,41 @@ function MyTicketsPage() {
   // Logika Filter Client-Side
   const getFilteredTicketsForDisplay = () => {
     if (!orders || orders.length === 0) return [];
-    const now = new Date();
+    const now = new Date(); // Mendapatkan tanggal dan waktu saat ini sebagai referensi
 
-    // Sesuaikan status 'paid' atau 'success' dengan status yang menandakan pembayaran berhasil dari backend Anda
-    const successStatuses = ['paid', 'success', 'completed']; // Contoh status berhasil
+    // --- BAGIAN PENTING UNTUK PENYESUAIAN FILTER ---
+    // Array `successStatuses` menentukan status pesanan mana yang dianggap "valid"
+    // untuk ditampilkan dalam filter "Upcoming" dan "Past Tickets".
+    // Contoh respons API Anda menunjukkan status "pending".
+    // Jika Anda ingin tiket dengan status "pending" (atau status lain dari API Anda)
+    // juga muncul di filter "Upcoming" atau "Past Tickets", Anda perlu
+    // menambahkan status tersebut (dalam huruf kecil) ke dalam array ini.
+    // Misalnya: const successStatuses = ['paid', 'success', 'completed', 'pending'];
+    // Sesuaikan ini dengan logika bisnis dan status yang digunakan oleh backend Anda.
+    const successStatuses = ['paid', 'success', 'completed']; // Ini adalah contoh bawaan Anda
 
     switch (activeFilter) {
       case 'Upcoming':
         return orders.filter(order => {
           const concertStartStr = order.ticket_orders?.[0]?.ticket?.concert?.concert_start;
-          // Pastikan order memiliki status berhasil sebelum mengecek tanggal
+          // Filter akan menampilkan tiket jika:
+          // 1. Data tanggal konser ada dan valid.
+          // 2. Status pesanan (order.status) ada di dalam `successStatuses`.
+          // 3. Tanggal & waktu konser (`new Date(concertStartStr)`) LEBIH BESAR DARI waktu saat ini (`now`).
           return concertStartStr && successStatuses.includes(order.status?.toLowerCase()) && new Date(concertStartStr) > now;
         });
       case 'Past Tickets':
         return orders.filter(order => {
           const concertStartStr = order.ticket_orders?.[0]?.ticket?.concert?.concert_start;
-          // Pastikan order memiliki status berhasil sebelum mengecek tanggal
+          // Filter akan menampilkan tiket jika:
+          // 1. Data tanggal konser ada dan valid.
+          // 2. Status pesanan (order.status) ada di dalam `successStatuses`.
+          // 3. Tanggal & waktu konser (`new Date(concertStartStr)`) LEBIH KECIL ATAU SAMA DENGAN waktu saat ini (`now`).
           return concertStartStr && successStatuses.includes(order.status?.toLowerCase()) && new Date(concertStartStr) <= now;
         });
       case 'All Transaction History':
       default:
-        return orders; // Menampilkan semua order dari halaman API saat ini
+        return orders; // Menampilkan semua order dari halaman API saat ini tanpa filter status/tanggal
     }
   };
 
@@ -176,23 +181,23 @@ function MyTicketsPage() {
     }
   };
   
-  // Kondisi Loading Awal atau Saat Error dan Tidak Ada Data
   if (isLoading && orders.length === 0) {
     return <div className="text-center p-10 text-xl animate-pulse">Memuat tiket Anda...</div>;
   }
+
   if (error && orders.length === 0 && !isLoading) {
     return (
       <>
         <HeroMyTicket />
         <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
           <div className="bg-white shadow-xl rounded-lg p-4 sm:p-6 max-w-7xl mx-auto text-center">
-            <TicketFilters // Tetap tampilkan filter meskipun error
+            <TicketFilters
               onFilterChange={handleFilterChange}
               currentActiveFilter={activeFilter}
             />
             <p className="text-red-600 text-xl mb-4">{error}</p>
             <button 
-              onClick={() => { setCurrentPage(1); setActiveFilter(activeFilter); /* Memicu fetchOrders */ }}
+              onClick={() => { setCurrentPage(1); /* Memicu fetchOrders dengan filter aktif saat ini */ }}
               className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-6 rounded-lg transition duration-150"
             >
               Coba Lagi
@@ -213,11 +218,13 @@ function MyTicketsPage() {
             currentActiveFilter={activeFilter}
           />
 
-          {/* Jika loading selesai tapi tidak ada tiket setelah filter atau dari API */}
           {!isLoading && ticketsToDisplay.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-gray-600 text-xl mb-4">
-                {`Tidak ada tiket untuk filter "${activeFilter}".`}
+                {/* Pesan akan disesuaikan jika tidak ada tiket setelah API call atau setelah filter */}
+                {orders.length > 0 
+                  ? `Tidak ada tiket untuk filter "${activeFilter}".` 
+                  : `Anda belum memiliki tiket pada kategori "${activeFilter}".`}
               </p>
               <Link
                 to="/"
@@ -228,18 +235,20 @@ function MyTicketsPage() {
             </div>
           ) : (
             <>
-              <div className="flex flex-col items-center space-y-6">
-                {ticketsToDisplay.map((order) => (
-                  <TicketCard
-                    key={order.id} // Gunakan order.id yang unik dari API sebagai key
-                    ticket={order} // Kirim seluruh objek order ke TicketCard
-                    // onDelete prop bisa tetap ada jika TicketCard Anda menggunakannya
-                    onDelete={() => handleDeleteTicket(order.id)}
-                  />
-                ))}
-              </div>
+              {isLoading && <div className="text-center p-10 text-xl animate-pulse">Memperbarui daftar tiket...</div>}
+              {!isLoading && ticketsToDisplay.length > 0 && (
+                <div className="flex flex-col items-center space-y-6">
+                  {ticketsToDisplay.map((order) => (
+                    <TicketCard
+                      key={order.id}
+                      ticket={order}
+                      onDelete={() => handleDeleteTicket(order.id)}
+                    />
+                  ))}
+                </div>
+              )}
 
-              {paginationInfo.totalPages > 1 && (
+              {!isLoading && paginationInfo.totalPages > 1 && ticketsToDisplay.length > 0 && (
                 <div className="mt-8 flex justify-center items-center space-x-4">
                   <button
                     onClick={goToPreviousPage}
